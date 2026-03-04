@@ -1,2 +1,2 @@
-# Sales-tracker
+# sales-tracker
 Replaces paper tracker

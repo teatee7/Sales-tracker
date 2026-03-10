@@ -643,53 +643,7 @@ cursor: default;
 .week-stats { font-size: 10px; letter-spacing: 1px; text-align: right; width: 80px; flex-shrink:0; }
 .week-row.today-row .week-day { color: #f5c542; }
 
-/* ── HOUR MINI MODAL ── */
-#hour-mini-modal {
-display: none;
-position: fixed;
-top: 0; left: 0; right: 0; bottom: 0;
-background: rgba(0,0,0,0.65);
-z-index: 998;
--webkit-align-items: center; align-items: center;
--webkit-justify-content: center; justify-content: center;
-padding: 20px;
-}
-#hour-mini-modal.show { display: -webkit-flex; display: flex; }
-.hour-mini-box {
-width: 100%; max-width: 320px;
-border: 1px solid;
-border-radius: 18px;
-padding: 24px 22px;
--webkit-animation: sheetUp 0.25s cubic-bezier(0.34,1.2,0.64,1) forwards;
-animation: sheetUp 0.25s cubic-bezier(0.34,1.2,0.64,1) forwards;
-}
-.hour-mini-title {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 26px; letter-spacing: 2px;
-margin-bottom: 16px;
-}
-.hour-mini-row {
-display: -webkit-flex; display: flex;
--webkit-justify-content: space-between; justify-content: space-between;
-padding: 7px 0;
-border-bottom: 1px solid;
-font-size: 12px;
-}
-.hour-mini-row:last-of-type { border-bottom: none; }
-.hour-mini-val {
-font-family: ‘Bebas Neue’, sans-serif;
-font-size: 16px;
-}
-.hour-mini-close {
-margin-top: 18px;
-width: 100%; padding: 12px;
-background: transparent; border: 1px solid;
-border-radius: 8px; cursor: pointer;
-font-family: ‘DM Mono’, monospace;
-font-size: 10px; letter-spacing: 2px;
-text-transform: uppercase;
--webkit-tap-highlight-color: transparent;
-}
+/* hour mini modal removed */
 
 /* ── COUNT-UP ANIMATION ── */
 @-webkit-keyframes countUp {
@@ -1088,16 +1042,6 @@ text-transform: uppercase; margin-bottom: 10px;
 
   </div><!-- /history -->
 
-  <!-- HOUR MINI MODAL -->
-
-  <div id="hour-mini-modal" onclick="hideHourMini()">
-    <div class="hour-mini-box card" onclick="event.stopPropagation()">
-      <div class="hour-mini-title txt-main" id="hour-mini-title">Hour</div>
-      <div id="hour-mini-rows"></div>
-      <button class="hour-mini-close txt-muted" onclick="hideHourMini()">Close</button>
-    </div>
-  </div>
-
   <!-- LEADERBOARD -->
 
   <div class="tab-panel" id="panel-lb">
@@ -1189,7 +1133,7 @@ try { archive = JSON.parse(localStorage.getItem('closer-archive') || '{}'); } ca
 
 // Best-ever records
 var bests = { approach:0, stopRate:0, storyRate:0, closeRate:0 };
-try { bests = JSON.parse(localStorage.getItem('closer-bests') || JSON.stringify(bests)); } catch(e) {}
+try { localStorage.removeItem('closer-bests'); } catch(e) {}
 
 function todayKey() {
   var d = new Date();
@@ -1522,7 +1466,7 @@ function renderHourly() {
     var a = d.approach||0, s = d.stop||0, p = d.story||0, c = d.close||0;
     var pAS = pct(s,a), pSSt = pct(p,s), pStC = pct(c,p);
     var cur = (h === now);
-    html += '<div class="hourly-row row-border' + (cur ? ' current-hour' : '') + '" data-hour="' + h + '">';
+    html += '<div class="hourly-row row-border' + (cur ? ' current-hour' : '') + '">';
     html += '<div class="hour-label txt-muted">' + fmtHour(h) + (cur ? ' ●' : '') + '</div>';
     html += '<div class="hour-val txt-main">' + a + '</div>';
     html += '<div class="hour-val txt-main">' + s + '</div>';
@@ -1535,7 +1479,6 @@ function renderHourly() {
   }
   body.innerHTML = html;
   renderInsights();
-  setupLongPress();
 }
 
 // ── TRACK ──
@@ -1845,56 +1788,7 @@ function renderWeek() {
   wb.innerHTML = html;
 }
 
-// ── HOUR MINI MODAL (long press) ──
-var longPressTimer = null;
-
-function setupLongPress() {
-  var hourlyBody = document.getElementById('hourly-body');
-  if (!hourlyBody) return;
-  hourlyBody.addEventListener('touchstart', function(e) {
-    var row = e.target.closest('.hourly-row');
-    if (!row) return;
-    longPressTimer = setTimeout(function() {
-      var h = row.getAttribute('data-hour');
-      if (h !== null) showHourMini(parseInt(h));
-    }, 500);
-  }, { passive: true });
-  hourlyBody.addEventListener('touchend',   function(){ clearTimeout(longPressTimer); }, { passive:true });
-  hourlyBody.addEventListener('touchmove',  function(){ clearTimeout(longPressTimer); }, { passive:true });
-  hourlyBody.addEventListener('touchcancel',function(){ clearTimeout(longPressTimer); }, { passive:true });
-}
-
-function showHourMini(h) {
-  var d = hourly[String(h)];
-  if (!d) return;
-  var a = d.approach||0, s = d.stop||0, p = d.story||0, c = d.close||0;
-  var rAS  = a ? Math.round(s/a*100) : null;
-  var rSSt = s ? Math.round(p/s*100) : null;
-  var rStC = p ? Math.round(c/p*100) : null;
-  document.getElementById('hour-mini-title').textContent = fmtHour(h) + ' Breakdown';
-  var rows = [
-    ['Approaches', a, null],
-    ['Stops',      s, rAS  !== null ? rAS+'%'  : '—'],
-    ['Short Stories', p, rSSt !== null ? rSSt+'%' : '—'],
-    ['Closes',     c, rStC !== null ? rStC+'%' : '—']
-  ];
-  var html = '';
-  rows.forEach(function(r) {
-    html += '<div class="hour-mini-row row-border">';
-    html += '<span class="txt-muted" style="font-size:10px;letter-spacing:1px;text-transform:uppercase">' + r[0] + '</span>';
-    html += '<div style="text-align:right">';
-    html += '<span class="hour-mini-val txt-main">' + r[1] + '</span>';
-    if (r[2]) html += '<span class="txt-muted" style="font-size:10px;margin-left:6px">' + r[2] + '</span>';
-    html += '</div></div>';
-  });
-  document.getElementById('hour-mini-rows').innerHTML = html;
-  document.getElementById('hour-mini-modal').classList.add('show');
-  if (navigator.vibrate) navigator.vibrate(20);
-}
-
-function hideHourMini() {
-  document.getElementById('hour-mini-modal').classList.remove('show');
-}
+// long press removed
 
 // ── BREAKDOWN ──
 function generateBreakdownText() {

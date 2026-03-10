@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Closer – Sales Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+
+/* ── NO CSS VARIABLES — all colours explicit per theme ── */
+
+body {
+font-family: ‘DM Mono’, monospace;
+min-height: 100vh;
+display: -webkit-flex;
+display: flex;
+-webkit-flex-direction: column;
+flex-direction: column;
+-webkit-align-items: center;
+align-items: center;
+padding: 40px 16px 80px;
+overflow-x: hidden;
+touch-action: manipulation;
+}
+
+/* DARK (default) */
+body                { background: #0a0a0a; color: #f0f0f0; }
+body .card          { background: #141414; border-color: #272727; }
+body .card2         { background: #1c1c1c; border-color: #272727; }
+body .bar-track     { background: #1e1e1e; }
+body .tab-btn       { background: #141414; border-color: #272727; color: #555; }
+body .tab-btn.active{ background: #f0f0f0; border-color: #f0f0f0; color: #0a0a0a; }
+body .util-btn      { background: transparent; border-color: #272727; color: #555; }
+body .txt-main      { color: #f0f0f0; }
+body .txt-muted     { color: #555; }
+body .row-border    { border-bottom-color: #222; }
+body .modal-cancel  { background: transparent; border-color: #272727; color: #555; }
+
+/* LIGHT */
+body.light                { background: #f2f0eb; color: #111111; }
+body.light .card          { background: #ffffff; border-color: #e0dcd4; }
+body.light .card2         { background: #f7f5f0; border-color: #e0dcd4; }
+body.light .bar-track     { background: #e4e0d8; }
+body.light .tab-btn       { background: #ffffff; border-color: #e0dcd4; color: #999; }
+body.light .tab-btn.active{ background: #111111; border-color: #111111; color: #f2f0eb; }
+body.light .util-btn      { background: transparent; border-color: #e0dcd4; color: #999; }
+body.light .txt-main      { color: #111111; }
+body.light .txt-muted     { color: #999; }
+body.light .row-border    { border-bottom-color: #e8e4de; }
+body.light .modal-cancel  { background: transparent; border-color: #e0dcd4; color: #999; }
+
+/* ── LAYOUT ── */
+.container { width: 100%; max-width: 620px; position: relative; }
+header { text-align: center; margin-bottom: 44px; position: relative; }
+
+h1 {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: clamp(56px, 13vw, 92px);
+letter-spacing: 5px;
+line-height: 1;
+}
+
+.subtitle { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; margin-top: 6px; }
+
+/* ── THEME BUTTON ── */
+#theme-btn {
+position: absolute;
+top: 4px; right: 0;
+width: 40px; height: 40px;
+border-radius: 10px;
+border: 1px solid;
+font-size: 18px;
+cursor: pointer;
+display: -webkit-flex;
+display: flex;
+-webkit-align-items: center;
+align-items: center;
+-webkit-justify-content: center;
+justify-content: center;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
+}
+
+/* ── TABS ── */
+.tab-bar { display: -webkit-flex; display: flex; gap: 8px; margin-bottom: 28px; }
+
+.tab-btn {
+-webkit-flex: 1; flex: 1;
+padding: 10px;
+border-radius: 10px;
+border: 1px solid;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── ACTION BUTTONS ── */
+.actions { display: -webkit-flex; display: flex; gap: 10px; margin-bottom: 36px; }
+
+.btn-wrap {
+-webkit-flex: 1; flex: 1;
+display: -webkit-flex; display: flex;
+-webkit-flex-direction: column; flex-direction: column;
+-webkit-align-items: center; align-items: center;
+gap: 7px;
+}
+
+.btn-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; }
+
+.action-btn {
+width: 100%;
+aspect-ratio: 1 / 1;
+border: none;
+border-radius: 16px;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-flex-direction: column; flex-direction: column;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
+-webkit-user-select: none; user-select: none;
+overflow: hidden;
+}
+
+.action-btn .icon  { font-size: clamp(13px, 3.5vw, 18px); opacity: 0.85; line-height: 1; }
+.action-btn .count { font-family: ‘Bebas Neue’, sans-serif; font-size: clamp(30px, 9vw, 52px); line-height: 1.1; }
+
+.btn-approach { background: #f5c542; color: #1a1200; box-shadow: 0 6px 24px rgba(245,197,66,0.28); }
+.btn-stop     { background: #4ecdc4; color: #001a19; box-shadow: 0 6px 24px rgba(78,205,196,0.28); }
+.btn-story    { background: #a78bfa; color: #110a2a; box-shadow: 0 6px 24px rgba(167,139,250,0.28); }
+.btn-close    { background: #f87171; color: #1a0505; box-shadow: 0 6px 24px rgba(248,113,113,0.28); }
+
+/* ── BUTTON ANIMATIONS ── */
+.action-btn {
+-webkit-transition: -webkit-transform 0.12s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.12s ease;
+transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.12s ease;
+will-change: transform;
+}
+.action-btn:active {
+opacity: 1 !important;
+-webkit-transform: scale(0.88) !important;
+transform: scale(0.88) !important;
+}
+
+/* Ripple layer inside each button */
+.action-btn .ripple {
+position: absolute;
+border-radius: 50%;
+background: rgba(255,255,255,0.35);
+-webkit-transform: scale(0);
+transform: scale(0);
+pointer-events: none;
+width: 180%;
+padding-top: 180%;
+top: 50%; left: 50%;
+margin-top: -90%; margin-left: -90%;
+}
+@-webkit-keyframes ripple-go { to { -webkit-transform: scale(1); opacity: 0; } }
+@keyframes ripple-go          { to { transform: scale(1);         opacity: 0; } }
+.action-btn .ripple.go {
+-webkit-animation: ripple-go 0.45s ease-out forwards;
+animation: ripple-go 0.45s ease-out forwards;
+}
+
+/* Spring bounce on button after tap */
+@-webkit-keyframes spring {
+0%   { -webkit-transform: scale(0.88); }
+55%  { -webkit-transform: scale(1.08); }
+75%  { -webkit-transform: scale(0.97); }
+90%  { -webkit-transform: scale(1.02); }
+100% { -webkit-transform: scale(1); }
+}
+@keyframes spring {
+0%   { transform: scale(0.88); }
+55%  { transform: scale(1.08); }
+75%  { transform: scale(0.97); }
+90%  { transform: scale(1.02); }
+100% { transform: scale(1); }
+}
+.action-btn.springing {
+-webkit-animation: spring 0.38s cubic-bezier(0.34,1.56,0.64,1) forwards;
+animation: spring 0.38s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+/* Number pop when it changes */
+@-webkit-keyframes numPop {
+0%   { -webkit-transform: scale(1); }
+40%  { -webkit-transform: scale(1.4); }
+70%  { -webkit-transform: scale(0.92); }
+100% { -webkit-transform: scale(1); }
+}
+@keyframes numPop {
+0%   { transform: scale(1); }
+40%  { transform: scale(1.4); }
+70%  { transform: scale(0.92); }
+100% { transform: scale(1); }
+}
+.num-pop {
+display: inline-block;
+-webkit-animation: numPop 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards;
+animation: numPop 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+/* Stat card pulse when value changes */
+@-webkit-keyframes cardPulse {
+0%   { -webkit-transform: scale(1); }
+40%  { -webkit-transform: scale(1.04); }
+100% { -webkit-transform: scale(1); }
+}
+@keyframes cardPulse {
+0%   { transform: scale(1); }
+40%  { transform: scale(1.04); }
+100% { transform: scale(1); }
+}
+.stat-card {
+-webkit-transition: -webkit-transform 0.2s ease;
+transition: transform 0.2s ease;
+}
+.stat-card.card-pop {
+-webkit-animation: cardPulse 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+animation: cardPulse 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+/* ── STAT CARDS ── */
+.stats-grid { display: -webkit-flex; display: flex; gap: 10px; margin-bottom: 28px; }
+
+.stat-card {
+-webkit-flex: 1; flex: 1;
+border: 1px solid;
+border-radius: 14px;
+padding: 16px 8px;
+text-align: center;
+position: relative;
+overflow: hidden;
+}
+
+.stat-card::before { content: ‘’; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.card-a::before { background: #f5c542; }
+.card-s::before { background: #4ecdc4; }
+.card-c::before { background: #f87171; }
+
+.stat-pct { font-family: ‘Bebas Neue’, sans-serif; font-size: 34px; line-height: 1; }
+.card-a .stat-pct { color: #f5c542; }
+.card-s .stat-pct { color: #4ecdc4; }
+.card-c .stat-pct { color: #f87171; }
+.stat-label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; line-height: 1.5; }
+
+/* ── PIPELINE ── */
+.pipeline { border: 1px solid; border-radius: 16px; padding: 22px; margin-bottom: 20px; }
+.section-title { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 18px; }
+.pipeline-row { margin-bottom: 14px; }
+.pipeline-row:last-child { margin-bottom: 0; }
+.pipeline-meta { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; -webkit-align-items: baseline; align-items: baseline; margin-bottom: 6px; }
+.pipeline-name { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; }
+.pipeline-val  { font-family: ‘Bebas Neue’, sans-serif; font-size: 18px; }
+
+.bar-track { height: 10px; border-radius: 99px; overflow: hidden; position: relative; }
+.bar-fill  {
+height: 100%; border-radius: 99px;
+-webkit-transition: width 0.55s cubic-bezier(0.34,1.3,0.64,1);
+transition: width 0.55s cubic-bezier(0.34,1.3,0.64,1);
+position: relative;
+}
+/* Shimmer on bar fill */
+.bar-fill::after {
+content: ‘’;
+position: absolute;
+top: 0; left: -100%; width: 60%; height: 100%;
+background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+border-radius: 99px;
+}
+@-webkit-keyframes shimmer { to { left: 200%; } }
+@keyframes shimmer          { to { left: 200%; } }
+.bar-fill.shimmer::after {
+-webkit-animation: shimmer 0.6s ease forwards;
+animation: shimmer 0.6s ease forwards;
+}
+.bar-a { background: -webkit-linear-gradient(left,#c89a1c,#f5c542); background: linear-gradient(90deg,#c89a1c,#f5c542); }
+.bar-s { background: -webkit-linear-gradient(left,#2a9e96,#4ecdc4); background: linear-gradient(90deg,#2a9e96,#4ecdc4); }
+.bar-p { background: -webkit-linear-gradient(left,#7c5fd1,#a78bfa); background: linear-gradient(90deg,#7c5fd1,#a78bfa); }
+.bar-c { background: -webkit-linear-gradient(left,#c94444,#f87171); background: linear-gradient(90deg,#c94444,#f87171); }
+
+/* ── UTIL BUTTONS ── */
+.bottom-btns { display: -webkit-flex; display: flex; gap: 10px; }
+.util-btn {
+-webkit-flex: 1; flex: 1;
+padding: 13px;
+border: 1px solid;
+border-radius: 10px;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
+}
+
+/* ── HOURLY ── */
+.hourly-section { border: 1px solid; border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+
+.hourly-header {
+display: -webkit-flex; display: flex;
+padding: 10px 14px;
+border-bottom: 1px solid #272727;
+}
+
+body.light .hourly-header { border-bottom-color: #e0dcd4; }
+
+.hourly-header span { font-size: 7px; letter-spacing: 1px; text-transform: uppercase; text-align: center; -webkit-flex: 1; flex: 1; }
+.hourly-header span:first-child { -webkit-flex: 0 0 52px; flex: 0 0 52px; text-align: left; }
+
+.hourly-row {
+display: -webkit-flex; display: flex;
+padding: 9px 14px;
+border-bottom: 1px solid;
+-webkit-align-items: center; align-items: center;
+}
+.hourly-row:last-child { border-bottom: none; }
+
+.hour-label { font-size: 11px; -webkit-flex: 0 0 52px; flex: 0 0 52px; }
+.hour-val   { -webkit-flex: 1; flex: 1; font-family: ‘Bebas Neue’, sans-serif; font-size: 15px; text-align: center; }
+.hour-pct   { -webkit-flex: 1; flex: 1; font-family: ‘Bebas Neue’, sans-serif; font-size: 14px; text-align: center; }
+.hour-pct.pct-a { color: #f5c542; }
+.hour-pct.pct-s { color: #4ecdc4; }
+.hour-pct.pct-c { color: #f87171; }
+.hour-pct.empty { font-family: ‘DM Mono’, monospace; font-size: 11px; }
+.hourly-row.current-hour .hour-label { color: #f5c542; }
+
+.no-data { padding: 36px; text-align: center; font-size: 11px; letter-spacing: 1px; }
+
+/* ── MODAL ── */
+#confirm-modal {
+display: none;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0,0,0,0.72);
+z-index: 999;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+}
+#confirm-modal.show { display: -webkit-flex; display: flex; }
+
+.modal-box { border: 1px solid; border-radius: 18px; padding: 32px 26px; text-align: center; max-width: 280px; width: 90%; }
+.modal-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 24px; letter-spacing: 2px; margin-bottom: 8px; }
+.modal-sub   { font-size: 11px; letter-spacing: 1px; margin-bottom: 24px; }
+.modal-btns  { display: -webkit-flex; display: flex; gap: 10px; }
+
+.modal-cancel {
+-webkit-flex: 1; flex: 1;
+padding: 12px;
+border: 1px solid;
+border-radius: 8px;
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+-webkit-tap-highlight-color: transparent;
+}
+
+.modal-confirm {
+-webkit-flex: 1; flex: 1;
+padding: 12px;
+background: #f87171;
+border: none;
+border-radius: 8px;
+color: #1a0505;
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+font-weight: 500;
+-webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 400px) {
+.stat-pct { font-size: 26px; }
+.hourly-header, .hourly-row { padding: 8px 10px; }
+.hour-label { font-size: 10px; -webkit-flex: 0 0 44px; flex: 0 0 44px; }
+}
+
+/* Tell iOS we manage our own colours - prevent system dark mode interference */
+@media (prefers-color-scheme: dark) {
+body:not(.light) { background: #0a0a0a !important; color: #f0f0f0 !important; }
+body:not(.light) .card     { background: #141414 !important; border-color: #272727 !important; }
+body:not(.light) .bar-track{ background: #1e1e1e !important; }
+body:not(.light) .tab-btn  { background: #141414 !important; border-color: #272727 !important; color: #555 !important; }
+body:not(.light) .tab-btn.active { background: #f0f0f0 !important; color: #0a0a0a !important; }
+body:not(.light) .txt-main { color: #f0f0f0 !important; }
+body:not(.light) .txt-muted{ color: #555 !important; }
+body:not(.light) .util-btn { border-color: #272727 !important; color: #555 !important; }
+}
+@media (prefers-color-scheme: light) {
+body:not(.light) { background: #0a0a0a !important; color: #f0f0f0 !important; }
+}
+body.light { background: #f2f0eb !important; color: #111111 !important; }
+body.light .card     { background: #ffffff !important; border-color: #e0dcd4 !important; }
+body.light .bar-track{ background: #e4e0d8 !important; }
+body.light .tab-btn  { background: #ffffff !important; border-color: #e0dcd4 !important; color: #999 !important; }
+body.light .tab-btn.active { background: #111111 !important; color: #f2f0eb !important; }
+body.light .txt-main { color: #111111 !important; }
+body.light .txt-muted{ color: #999 !important; }
+body.light .util-btn { border-color: #e0dcd4 !important; color: #999 !important; }
+
+/* ── INSIGHTS ── */
+.insights { margin-bottom: 20px; }
+.insights-title {
+font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+margin-bottom: 12px; padding: 0 2px;
+}
+.insight-card {
+border: 1px solid; border-radius: 14px;
+padding: 16px 18px; margin-bottom: 10px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: flex-start; align-items: flex-start;
+gap: 14px;
+-webkit-transition: -webkit-transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.insight-card.slide-in {
+-webkit-animation: slideIn 0.4s cubic-bezier(0.34,1.2,0.64,1) forwards;
+animation: slideIn 0.4s cubic-bezier(0.34,1.2,0.64,1) forwards;
+}
+@-webkit-keyframes slideIn {
+from { opacity:0; -webkit-transform: translateY(12px) scale(0.97); }
+to   { opacity:1; -webkit-transform: translateY(0)    scale(1); }
+}
+@keyframes slideIn {
+from { opacity:0; transform: translateY(12px) scale(0.97); }
+to   { opacity:1; transform: translateY(0)    scale(1); }
+}
+.insight-card:last-child { margin-bottom: 0; }
+.insight-icon {
+font-size: 22px; line-height: 1;
+flex-shrink: 0; margin-top: 1px;
+}
+.insight-body { -webkit-flex: 1; flex: 1; }
+.insight-label {
+font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+margin-bottom: 3px;
+}
+.insight-label.good { color: #4ecdc4; }
+.insight-label.warn { color: #f5c542; }
+.insight-text { font-size: 12px; line-height: 1.5; }
+.insight-metric {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 22px; line-height: 1; margin-top: 4px;
+}
+.insight-metric.good { color: #4ecdc4; }
+.insight-metric.warn { color: #f5c542; }
+.no-insights { padding: 28px; text-align: center; font-size: 11px; letter-spacing: 1px; }
+
+/* ── BREAKDOWN MODAL ── */
+#breakdown-modal {
+display: none;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0,0,0,0.78);
+z-index: 999;
+-webkit-align-items: flex-end; align-items: flex-end;
+-webkit-justify-content: center; justify-content: center;
+padding: 0;
+}
+#breakdown-modal.show { display: -webkit-flex; display: flex; }
+
+.breakdown-sheet {
+width: 100%;
+max-width: 620px;
+border: 1px solid;
+border-bottom: none;
+border-radius: 22px 22px 0 0;
+padding: 28px 24px 48px;
+max-height: 82vh;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+-webkit-animation: sheetUp 0.32s cubic-bezier(0.34,1.2,0.64,1) forwards;
+animation: sheetUp 0.32s cubic-bezier(0.34,1.2,0.64,1) forwards;
+}
+
+@-webkit-keyframes sheetUp {
+from { -webkit-transform: translateY(100%); opacity: 0.6; }
+to   { -webkit-transform: translateY(0);    opacity: 1; }
+}
+@keyframes sheetUp {
+from { transform: translateY(100%); opacity: 0.6; }
+to   { transform: translateY(0);    opacity: 1; }
+}
+
+.sheet-handle {
+width: 40px; height: 4px;
+background: #444;
+border-radius: 99px;
+margin: 0 auto 24px;
+}
+body.light .sheet-handle { background: #ccc; }
+
+.breakdown-header {
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+-webkit-align-items: center; align-items: center;
+margin-bottom: 20px;
+}
+.breakdown-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 28px; letter-spacing: 2px;
+}
+.breakdown-close {
+width: 32px; height: 32px;
+border-radius: 50%;
+border: 1px solid;
+background: transparent;
+font-size: 16px;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+-webkit-tap-highlight-color: transparent;
+}
+
+.breakdown-text {
+font-size: 14px;
+line-height: 1.8;
+white-space: pre-wrap;
+word-break: break-word;
+margin-bottom: 24px;
+}
+
+.breakdown-actions {
+display: -webkit-flex; display: flex;
+gap: 10px;
+}
+.breakdown-copy {
+-webkit-flex: 1; flex: 1;
+padding: 14px;
+background: #f5c542;
+border: none;
+border-radius: 10px;
+color: #1a1200;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+font-weight: 500;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
+}
+.breakdown-copy.copied {
+background: #4ecdc4;
+color: #001a19;
+}
+
+/* ── CONFETTI ── */
+#confetti-canvas {
+position: fixed; top: 0; left: 0;
+width: 100%; height: 100%;
+pointer-events: none;
+z-index: 9999;
+}
+
+/* ── STREAK BADGE ── */
+#streak-badge {
+position: absolute;
+top: 4px; left: 0;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 5px;
+padding: 6px 10px;
+border: 1px solid;
+border-radius: 10px;
+font-size: 10px;
+letter-spacing: 1px;
+text-transform: uppercase;
+-webkit-user-select: none; user-select: none;
+}
+#streak-badge .streak-num {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 18px;
+line-height: 1;
+color: #f5c542;
+}
+
+/* ── BEST STATS PANEL ── */
+.bests-grid {
+display: -webkit-flex; display: flex;
+gap: 10px; flex-wrap: wrap;
+margin-bottom: 20px;
+}
+.best-chip {
+-webkit-flex: 1; flex: 1;
+min-width: calc(50% - 5px);
+border: 1px solid;
+border-radius: 12px;
+padding: 14px 12px;
+position: relative;
+overflow: hidden;
+}
+.best-chip::before {
+content: ‘’;
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 2px;
+background: #f5c542;
+}
+.best-chip-val {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 28px; line-height: 1;
+color: #f5c542;
+}
+.best-chip-lbl {
+font-size: 8px; letter-spacing: 1.5px;
+text-transform: uppercase; margin-top: 3px;
+}
+
+/* ── WEEKLY SUMMARY ── */
+.week-row {
+display: -webkit-flex; display: flex;
+padding: 10px 14px;
+border-bottom: 1px solid;
+-webkit-align-items: center; align-items: center;
+gap: 6px;
+cursor: default;
+}
+.week-row:last-child { border-bottom: none; }
+.week-day { font-size: 10px; letter-spacing: 1px; width: 30px; flex-shrink: 0; }
+.week-bar-wrap { -webkit-flex:1; flex:1; height:8px; border-radius:99px; overflow:hidden; }
+.week-bar-fill { height:100%; border-radius:99px; background: linear-gradient(90deg,#c89a1c,#f5c542); transition: width 0.5s cubic-bezier(0.34,1.3,0.64,1); }
+.week-stats { font-size: 10px; letter-spacing: 1px; text-align: right; width: 80px; flex-shrink:0; }
+.week-row.today-row .week-day { color: #f5c542; }
+
+/* ── HOUR MINI MODAL ── */
+#hour-mini-modal {
+display: none;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0,0,0,0.65);
+z-index: 998;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+padding: 20px;
+}
+#hour-mini-modal.show { display: -webkit-flex; display: flex; }
+.hour-mini-box {
+width: 100%; max-width: 320px;
+border: 1px solid;
+border-radius: 18px;
+padding: 24px 22px;
+-webkit-animation: sheetUp 0.25s cubic-bezier(0.34,1.2,0.64,1) forwards;
+animation: sheetUp 0.25s cubic-bezier(0.34,1.2,0.64,1) forwards;
+}
+.hour-mini-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 26px; letter-spacing: 2px;
+margin-bottom: 16px;
+}
+.hour-mini-row {
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+padding: 7px 0;
+border-bottom: 1px solid;
+font-size: 12px;
+}
+.hour-mini-row:last-of-type { border-bottom: none; }
+.hour-mini-val {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 16px;
+}
+.hour-mini-close {
+margin-top: 18px;
+width: 100%; padding: 12px;
+background: transparent; border: 1px solid;
+border-radius: 8px; cursor: pointer;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px; letter-spacing: 2px;
+text-transform: uppercase;
+-webkit-tap-highlight-color: transparent;
+}
+
+/* ── COUNT-UP ANIMATION ── */
+@-webkit-keyframes countUp {
+from { opacity:0; -webkit-transform: translateY(8px) scale(0.85); }
+to   { opacity:1; -webkit-transform: translateY(0)  scale(1); }
+}
+@keyframes countUp {
+from { opacity:0; transform: translateY(8px) scale(0.85); }
+to   { opacity:1; transform: translateY(0)  scale(1); }
+}
+.count-up {
+display: inline-block;
+-webkit-animation: countUp 0.22s ease forwards;
+animation: countUp 0.22s ease forwards;
+}
+
+/* EXTRA TAB for history */
+.tab-bar { flex-wrap: wrap; }
+</style>
+
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="container">
+
+  <header>
+    <div id="streak-badge" class="card txt-muted"><span>🔥</span><span class="streak-num" id="streak-num">0</span><span>day</span></div>
+    <button id="theme-btn" class="card" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+    <h1 class="txt-main">CLOSER</h1>
+    <div class="subtitle txt-muted">Sales Conversion Tracker</div>
+  </header>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-today"  onclick="switchTab('today')">📊 Today</button>
+    <button class="tab-btn"        id="tab-hourly" onclick="switchTab('hourly')">🕐 By Hour</button>
+    <button class="tab-btn"        id="tab-history" onclick="switchTab('history')">📅 History</button>
+  </div>
+
+  <!-- TODAY -->
+
+  <div class="tab-panel active" id="panel-today">
+
+```
+<div class="actions">
+  <div class="btn-wrap">
+    <button class="action-btn btn-approach" style="position:relative" onclick="track('approach',this)">
+      <span class="ripple"></span><span class="icon">👋</span><span class="count" id="btn-approach">0</span>
+    </button>
+    <div class="btn-label txt-muted">Approach</div>
+  </div>
+  <div class="btn-wrap">
+    <button class="action-btn btn-stop" style="position:relative" onclick="track('stop',this)">
+      <span class="ripple"></span><span class="icon">✋</span><span class="count" id="btn-stop">0</span>
+    </button>
+    <div class="btn-label txt-muted">Stop</div>
+  </div>
+  <div class="btn-wrap">
+    <button class="action-btn btn-story" style="position:relative" onclick="track('story',this)">
+      <span class="ripple"></span><span class="icon">💬</span><span class="count" id="btn-story">0</span>
+    </button>
+    <div class="btn-label txt-muted">Short Story</div>
+  </div>
+  <div class="btn-wrap">
+    <button class="action-btn btn-close" style="position:relative" onclick="track('close',this)">
+      <span class="ripple"></span><span class="icon">🤝</span><span class="count" id="btn-close">0</span>
+    </button>
+    <div class="btn-label txt-muted">Close</div>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card card card-a" id="stat-stop">
+    <div class="stat-pct" id="pct-stop">—</div>
+    <div class="stat-label txt-muted">Approach<br>→ Stop</div>
+  </div>
+  <div class="stat-card card card-s" id="stat-story">
+    <div class="stat-pct" id="pct-story">—</div>
+    <div class="stat-label txt-muted">Stop<br>→ Story</div>
+  </div>
+  <div class="stat-card card card-c" id="stat-close">
+    <div class="stat-pct" id="pct-close">—</div>
+    <div class="stat-label txt-muted">Story<br>→ Close</div>
+  </div>
+</div>
+
+<div class="pipeline card" style="border:1px solid">
+  <div class="section-title txt-muted">Pipeline Funnel</div>
+  <div class="pipeline-row">
+    <div class="pipeline-meta">
+      <span class="pipeline-name txt-muted">Approaches</span>
+      <span class="pipeline-val" id="num-approach" style="color:#f5c542">0</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill bar-a" id="bar-a" style="width:100%"></div></div>
+  </div>
+  <div class="pipeline-row">
+    <div class="pipeline-meta">
+      <span class="pipeline-name txt-muted">Stops</span>
+      <span class="pipeline-val" id="num-stop" style="color:#4ecdc4">0</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill bar-s" id="bar-s" style="width:0%"></div></div>
+  </div>
+  <div class="pipeline-row">
+    <div class="pipeline-meta">
+      <span class="pipeline-name txt-muted">Short Stories</span>
+      <span class="pipeline-val" id="num-story" style="color:#a78bfa">0</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill bar-p" id="bar-p" style="width:0%"></div></div>
+  </div>
+  <div class="pipeline-row">
+    <div class="pipeline-meta">
+      <span class="pipeline-name txt-muted">Closes</span>
+      <span class="pipeline-val" id="num-close" style="color:#f87171">0</span>
+    </div>
+    <div class="bar-track"><div class="bar-fill bar-c" id="bar-c" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="bottom-btns">
+  <button class="util-btn" onclick="undoLast()">⌫ Undo Last</button>
+  <button class="util-btn" onclick="showReset()">↺ Reset Session</button>
+</div>
+```
+
+  </div><!-- /today -->
+
+  <!-- HOURLY -->
+
+  <div class="tab-panel" id="panel-hourly">
+
+```
+<div id="insights-section" class="insights"></div>
+
+<div class="hourly-section card">
+  <div class="hourly-header card2">
+    <span class="txt-muted" style="text-align:left">Hour</span>
+    <span style="color:#f5c542">App</span>
+    <span style="color:#4ecdc4">Stop</span>
+    <span style="color:#a78bfa">Story</span>
+    <span style="color:#f87171">Close</span>
+    <span style="color:#f5c542">A→S%</span>
+    <span style="color:#4ecdc4">S→St%</span>
+    <span style="color:#f87171">St→C%</span>
+  </div>
+  <div id="hourly-body"></div>
+</div>
+
+<div class="bottom-btns" style="margin-bottom:10px">
+  <button class="util-btn" onclick="switchTab('today')">← Back</button>
+  <button class="util-btn" onclick="showReset()">↺ Reset Session</button>
+</div>
+<button class="util-btn" style="-webkit-flex:1;flex:1;width:100%;background:#f5c542;color:#1a1200;border-color:#f5c542;font-weight:500" onclick="showBreakdown()">📋 Daily Breakdown</button>
+```
+
+  </div><!-- /hourly -->
+
+  <!-- HISTORY -->
+
+  <div class="tab-panel" id="panel-history">
+
+```
+<!-- Best Ever -->
+<div class="section-title txt-muted" style="margin-bottom:12px;font-size:9px;letter-spacing:3px;text-transform:uppercase">Personal Bests</div>
+<div class="bests-grid" id="bests-grid"></div>
+
+<!-- Weekly Summary -->
+<div class="pipeline card" style="margin-bottom:20px">
+  <div class="section-title txt-muted">This Week</div>
+  <div id="week-body"></div>
+</div>
+
+<div class="bottom-btns">
+  <button class="util-btn" onclick="switchTab('today')">← Back</button>
+</div>
+```
+
+  </div><!-- /history -->
+
+  <!-- HOUR MINI MODAL -->
+
+  <div id="hour-mini-modal" onclick="hideHourMini()">
+    <div class="hour-mini-box card" onclick="event.stopPropagation()">
+      <div class="hour-mini-title txt-main" id="hour-mini-title">Hour</div>
+      <div id="hour-mini-rows"></div>
+      <button class="hour-mini-close txt-muted" onclick="hideHourMini()">Close</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- MODAL -->
+
+<div id="confirm-modal" onclick="hideReset()">
+  <div class="modal-box card" onclick="event.stopPropagation()">
+    <div class="modal-title txt-main">Reset Session?</div>
+    <div class="modal-sub txt-muted">All counts and hourly data will be cleared.</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="hideReset()">Cancel</button>
+      <button class="modal-confirm" onclick="doReset()">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+var saved = null;
+try {
+  saved = JSON.parse(localStorage.getItem('closer-v2') || 'null');
+  if (!saved) {
+    var oldSave = JSON.parse(localStorage.getItem('closer-state') || 'null');
+    if (oldSave && oldSave.state) {
+      saved = { state: oldSave.state, history: oldSave.history || [], hourly: {} };
+      localStorage.setItem('closer-v2', JSON.stringify(saved));
+    }
+  }
+} catch(e) {}
+
+var state     = (saved && saved.state)   || { approach:0, stop:0, story:0, close:0 };
+var actionLog = (saved && saved.history) || [];
+var hourly    = (saved && saved.hourly)  || {};
+
+// Multi-day archive: { 'YYYY-MM-DD': { state, hourly } }
+var archive = {};
+try { archive = JSON.parse(localStorage.getItem('closer-archive') || '{}'); } catch(e) {}
+
+// Best-ever records
+var bests = { approach:0, stopRate:0, storyRate:0, closeRate:0 };
+try { bests = JSON.parse(localStorage.getItem('closer-bests') || JSON.stringify(bests)); } catch(e) {}
+
+function todayKey() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function save() {
+  try { localStorage.setItem('closer-v2', JSON.stringify({ state:state, history:actionLog, hourly:hourly })); } catch(e) {}
+  // Update bests
+  var a = state.approach, s = state.stop, p = state.story, c = state.close;
+  var changed = false;
+  if (a > bests.approach) { bests.approach = a; changed = true; }
+  if (a && Math.round(s/a*100) > bests.stopRate)  { bests.stopRate  = Math.round(s/a*100); changed = true; }
+  if (s && Math.round(p/s*100) > bests.storyRate) { bests.storyRate = Math.round(p/s*100); changed = true; }
+  if (p && Math.round(c/p*100) > bests.closeRate) { bests.closeRate = Math.round(c/p*100); changed = true; }
+  if (changed) try { localStorage.setItem('closer-bests', JSON.stringify(bests)); } catch(e) {}
+}
+
+function archiveToday() {
+  var key = todayKey();
+  if (state.approach > 0) {
+    archive[key] = { state: JSON.parse(JSON.stringify(state)), hourly: JSON.parse(JSON.stringify(hourly)) };
+    try { localStorage.setItem('closer-archive', JSON.stringify(archive)); } catch(e) {}
+  }
+}
+
+// ── HELPERS ──
+function pct(num, denom) {
+  if (!denom) return null;
+  return Math.round((num / denom) * 100) + '%';
+}
+function currentHour() { return new Date().getHours(); }
+function fmtHour(h) { var h12 = h % 12 || 12; return h12 + (h < 12 ? 'am' : 'pm'); }
+
+// ── UPDATE ──
+function popCard(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('card-pop');
+  void el.offsetWidth;
+  el.classList.add('card-pop');
+  setTimeout(function(){ el.classList.remove('card-pop'); }, 300);
+}
+function shimmerBar(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('shimmer');
+  void el.offsetWidth;
+  el.classList.add('shimmer');
+  setTimeout(function(){ el.classList.remove('shimmer'); }, 600);
+}
+function animatePct(elId, newVal) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  var prev = el.textContent;
+  var target = newVal ? parseInt(newVal) : null;
+  var prevNum = prev !== '—' ? parseInt(prev) : null;
+
+  if (target === null) { el.textContent = '—'; return; }
+  if (prevNum === target) return;
+
+  // Count up from prev to target
+  var start = prevNum !== null ? prevNum : Math.max(0, target - 15);
+  var duration = 350;
+  var startTime = null;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    var progress = Math.min((ts - startTime) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var val = Math.round(start + (target - start) * eased);
+    el.textContent = val + '%';
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = target + '%';
+      el.classList.remove('num-pop');
+      void el.offsetWidth;
+      el.classList.add('num-pop');
+      setTimeout(function(){ el.classList.remove('num-pop'); }, 320);
+    }
+  }
+  requestAnimationFrame(step);
+}
+function update(changedType) {
+  var a = state.approach, s = state.stop, p = state.story, c = state.close;
+
+  animatePct('pct-stop',  pct(s,a));
+  animatePct('pct-story', pct(p,s));
+  animatePct('pct-close', pct(c,p));
+
+  document.getElementById('num-approach').textContent = a;
+  document.getElementById('num-stop').textContent     = s;
+  document.getElementById('num-story').textContent    = p;
+  document.getElementById('num-close').textContent    = c;
+
+  var base = a || 1;
+  document.getElementById('bar-a').style.width = '100%';
+  document.getElementById('bar-s').style.width = Math.min(100,(s/base)*100) + '%';
+  document.getElementById('bar-p').style.width = Math.min(100,(p/base)*100) + '%';
+  document.getElementById('bar-c').style.width = Math.min(100,(c/base)*100) + '%';
+
+  if (changedType) {
+    // Shimmer all bars since ratios change
+    setTimeout(function(){
+      shimmerBar('bar-a'); shimmerBar('bar-s');
+      shimmerBar('bar-p'); shimmerBar('bar-c');
+    }, 80);
+    // Pop relevant stat cards
+    if (changedType === 'stop')    { popCard('stat-stop');  }
+    if (changedType === 'story')   { popCard('stat-story'); }
+    if (changedType === 'close')   { popCard('stat-close'); }
+    if (changedType === 'approach'){ popCard('stat-stop');  }
+  }
+}
+
+// ── INSIGHTS ──
+function renderInsights() {
+  var section = document.getElementById('insights-section');
+  if (!section) return;
+
+  var hours = Object.keys(hourly).map(Number).sort(function(a,b){ return a-b; });
+
+  // Need at least some data
+  var totalApproach = 0, totalStop = 0, totalStory = 0, totalClose = 0;
+  hours.forEach(function(h) {
+    var d = hourly[String(h)];
+    totalApproach += d.approach||0;
+    totalStop     += d.stop||0;
+    totalStory    += d.story||0;
+    totalClose    += d.close||0;
+  });
+
+  if (!totalApproach) {
+    section.innerHTML = '';
+    return;
+  }
+
+  // Build per-hour stats
+  var hoursWithData = [];
+  hours.forEach(function(h) {
+    var d = hourly[String(h)];
+    var a = d.approach||0, s = d.stop||0, p = d.story||0, c = d.close||0;
+    if (a > 0) hoursWithData.push({
+      h: h,
+      label: fmtHour(h),
+      approach: a, stop: s, story: p, close: c,
+      rAS:  a ? s/a : null,
+      rSSt: s ? p/s : null,
+      rStC: p ? c/p : null
+    });
+  });
+
+  // Overall rates
+  var overallAS  = totalApproach ? totalStop/totalApproach    : null;
+  var overallSSt = totalStop     ? totalStory/totalStop       : null;
+  var overallStC = totalStory    ? totalClose/totalStory      : null;
+
+  var insights = [];
+
+  // ── FIND 2 STRENGTHS ──
+  // Best approach-to-stop hour
+  var bestAS = null;
+  hoursWithData.forEach(function(hd) {
+    if (hd.rAS !== null && hd.approach >= 2) {
+      if (!bestAS || hd.rAS > bestAS.rAS) bestAS = hd;
+    }
+  });
+  if (bestAS && overallAS !== null && bestAS.rAS > overallAS) {
+    insights.push({
+      type: 'good',
+      icon: '⚡',
+      label: 'Best Stop Rate',
+      text: fmtHour(bestAS.h) + ' is your strongest hour for getting people to stop',
+      metric: Math.round(bestAS.rAS * 100) + '%'
+    });
+  } else if (overallAS !== null && totalStop >= 3) {
+    insights.push({
+      type: 'good',
+      icon: '✋',
+      label: 'Stop Rate',
+      text: 'You\'re stopping ' + Math.round(overallAS*100) + '% of people you approach — keep the energy up',
+      metric: Math.round(overallAS * 100) + '%'
+    });
+  }
+
+  // Best story-to-close hour
+  var bestStC = null;
+  hoursWithData.forEach(function(hd) {
+    if (hd.rStC !== null && hd.story >= 2) {
+      if (!bestStC || hd.rStC > bestStC.rStC) bestStC = hd;
+    }
+  });
+  if (bestStC && overallStC !== null && bestStC.rStC > overallStC) {
+    insights.push({
+      type: 'good',
+      icon: '🔥',
+      label: 'Best Close Rate',
+      text: fmtHour(bestStC.h) + ' is your sharpest closing hour',
+      metric: Math.round(bestStC.rStC * 100) + '%'
+    });
+  } else if (overallStC !== null && totalClose >= 1) {
+    insights.push({
+      type: 'good',
+      icon: '🤝',
+      label: 'Closing',
+      text: 'You\'re closing ' + Math.round(overallStC*100) + '% of your short stories — solid work',
+      metric: Math.round(overallStC * 100) + '%'
+    });
+  }
+
+  // Volume strength
+  if (insights.length < 2 && totalApproach >= 5) {
+    insights.push({
+      type: 'good',
+      icon: '💪',
+      label: 'Volume',
+      text: totalApproach + ' approaches across ' + hoursWithData.length + ' hour' + (hoursWithData.length > 1 ? 's' : '') + ' — great activity',
+      metric: totalApproach + ' app'
+    });
+  }
+
+  // ── FIND 1 WEAKNESS ──
+  var weakness = null;
+
+  // Worst stop rate hour (if significantly below average)
+  var worstAS = null;
+  hoursWithData.forEach(function(hd) {
+    if (hd.rAS !== null && hd.approach >= 3) {
+      if (!worstAS || hd.rAS < worstAS.rAS) worstAS = hd;
+    }
+  });
+  if (worstAS && overallAS !== null && worstAS.rAS < overallAS * 0.7) {
+    weakness = {
+      icon: '📉',
+      label: 'Work On This',
+      text: fmtHour(worstAS.h) + ' has a low stop rate — try adjusting your opener during this hour',
+      metric: Math.round(worstAS.rAS * 100) + '%'
+    };
+  }
+
+  // Low story conversion
+  if (!weakness && overallSSt !== null && totalStop >= 4 && overallSSt < 0.4) {
+    weakness = {
+      icon: '💬',
+      label: 'Work On This',
+      text: 'Only ' + Math.round(overallSSt*100) + '% of stops are getting to a short story — focus on the transition',
+      metric: Math.round(overallSSt * 100) + '%'
+    };
+  }
+
+  // Low close rate
+  if (!weakness && overallStC !== null && totalStory >= 3 && overallStC < 0.3) {
+    weakness = {
+      icon: '🎯',
+      label: 'Work On This',
+      text: 'Close rate is ' + Math.round(overallStC*100) + '% — tighten up your close after the short story',
+      metric: Math.round(overallStC * 100) + '%'
+    };
+  }
+
+  // Low volume
+  if (!weakness && totalApproach < 5 && hoursWithData.length > 0) {
+    weakness = {
+      icon: '🚶',
+      label: 'Work On This',
+      text: 'Approach volume is low — push for more conversations this hour',
+      metric: totalApproach + ' so far'
+    };
+  }
+
+  // Build HTML
+  // Trim strengths to 2
+  while (insights.length > 2) insights.pop();
+
+  if (!insights.length && !weakness) {
+    section.innerHTML = '';
+    return;
+  }
+
+  var out = '<div class="section-title txt-muted insights-title">Today\'s Insights</div>';
+
+  insights.forEach(function(ins, i) {
+    out += '<div class="insight-card card slide-in" style="-webkit-animation-delay:' + (i*0.08) + 's;animation-delay:' + (i*0.08) + 's">';
+    out += '<div class="insight-icon">' + ins.icon + '</div>';
+    out += '<div class="insight-body">';
+    out += '<div class="insight-label good">' + ins.label + '</div>';
+    out += '<div class="insight-text txt-muted">' + ins.text + '</div>';
+    out += '<div class="insight-metric good">' + ins.metric + '</div>';
+    out += '</div></div>';
+  });
+
+  if (weakness) {
+    var delay = insights.length * 0.08;
+    out += '<div class="insight-card card slide-in" style="-webkit-animation-delay:' + delay + 's;animation-delay:' + delay + 's">';
+    out += '<div class="insight-icon">' + weakness.icon + '</div>';
+    out += '<div class="insight-body">';
+    out += '<div class="insight-label warn">' + weakness.label + '</div>';
+    out += '<div class="insight-text txt-muted">' + weakness.text + '</div>';
+    out += '<div class="insight-metric warn">' + weakness.metric + '</div>';
+    out += '</div></div>';
+  }
+
+  section.innerHTML = out;
+}
+
+// ── HOURLY ──
+function renderHourly() {
+  var body = document.getElementById('hourly-body');
+  var hours = Object.keys(hourly).map(Number).sort(function(a,b){ return a-b; });
+  if (!hours.length) {
+    body.innerHTML = '<div class="no-data txt-muted">No data yet — start tracking!</div>';
+    return;
+  }
+  var now = currentHour();
+  var html = '';
+  for (var i = 0; i < hours.length; i++) {
+    var h = hours[i];
+    var d = hourly[String(h)];
+    var a = d.approach||0, s = d.stop||0, p = d.story||0, c = d.close||0;
+    var pAS = pct(s,a), pSSt = pct(p,s), pStC = pct(c,p);
+    var cur = (h === now);
+    html += '<div class="hourly-row row-border' + (cur ? ' current-hour' : '') + '" data-hour="' + h + '">';
+    html += '<div class="hour-label txt-muted">' + fmtHour(h) + (cur ? ' ●' : '') + '</div>';
+    html += '<div class="hour-val txt-main">' + a + '</div>';
+    html += '<div class="hour-val txt-main">' + s + '</div>';
+    html += '<div class="hour-val txt-main">' + p + '</div>';
+    html += '<div class="hour-val txt-main">' + c + '</div>';
+    html += pAS   ? '<div class="hour-pct pct-a">' + pAS  + '</div>' : '<div class="hour-pct empty txt-muted">—</div>';
+    html += pSSt  ? '<div class="hour-pct pct-s">' + pSSt + '</div>' : '<div class="hour-pct empty txt-muted">—</div>';
+    html += pStC  ? '<div class="hour-pct pct-c">' + pStC + '</div>' : '<div class="hour-pct empty txt-muted">—</div>';
+    html += '</div>';
+  }
+  body.innerHTML = html;
+  renderInsights();
+  setupLongPress();
+}
+
+// ── TRACK ──
+function track(type, btn) {
+  state[type]++;
+  actionLog.push(type);
+  var h = String(currentHour());
+  if (!hourly[h]) hourly[h] = { approach:0, stop:0, story:0, close:0 };
+  hourly[h][type]++;
+
+  // Ripple
+  var ripple = btn.querySelector('.ripple');
+  if (ripple) {
+    ripple.classList.remove('go');
+    void ripple.offsetWidth;
+    ripple.classList.add('go');
+  }
+
+  // Spring bounce
+  btn.classList.remove('springing');
+  void btn.offsetWidth;
+  btn.classList.add('springing');
+  setTimeout(function(){ btn.classList.remove('springing'); }, 380);
+
+  // Number pop
+  var countEl = btn.querySelector('.count');
+  countEl.textContent = state[type];
+  countEl.classList.remove('num-pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('num-pop');
+  setTimeout(function(){ countEl.classList.remove('num-pop'); }, 320);
+
+  // Haptic feedback
+  if (navigator.vibrate) navigator.vibrate(30);
+
+  // Confetti on close
+  if (type === 'close') {
+    setTimeout(function(){ launchConfetti(); }, 80);
+  }
+
+  update(type);
+  save();
+}
+
+// ── UNDO ──
+function undoLast() {
+  if (!actionLog.length) return;
+  var last = actionLog.pop();
+  if (state[last] > 0) {
+    state[last]--;
+    document.getElementById('btn-' + last).textContent = state[last];
+  }
+  var hours = Object.keys(hourly).map(Number).sort(function(a,b){ return b-a; });
+  for (var i = 0; i < hours.length; i++) {
+    var h = String(hours[i]);
+    if (hourly[h] && hourly[h][last] > 0) {
+      hourly[h][last]--;
+      if (!hourly[h].approach && !hourly[h].stop && !hourly[h].story && !hourly[h].close) delete hourly[h];
+      break;
+    }
+  }
+  update(null);
+  save();
+}
+
+// ── RESET ──
+function showReset() { document.getElementById('confirm-modal').classList.add('show'); }
+function hideReset() { document.getElementById('confirm-modal').classList.remove('show'); }
+function doReset() {
+  hideReset();
+  archiveToday();
+  state = { approach:0, stop:0, story:0, close:0 };
+  actionLog.length = 0;
+  hourly = {};
+  ['approach','stop','story','close'].forEach(function(t) {
+    document.getElementById('btn-' + t).textContent = 0;
+  });
+  update(null);
+  renderHourly();
+  save();
+  updateStreak();
+}
+
+// ── TABS ──
+function switchTab(name) {
+  var panels = ['today','hourly','history'];
+  panels.forEach(function(p) {
+    var panel = document.getElementById('panel-' + p);
+    var tab   = document.getElementById('tab-' + p);
+    if (panel) panel.classList.toggle('active', p === name);
+    if (tab)   tab.classList.toggle('active',   p === name);
+  });
+  if (name === 'hourly')  renderHourly();
+  if (name === 'history') renderHistory();
+}
+
+// ── THEME ──
+// Pure CSS classes — body.light switches everything. No JS style setting needed.
+function toggleTheme() {
+  var isLight = document.body.classList.toggle('light');
+  document.getElementById('theme-btn').textContent = isLight ? '☀️' : '🌙';
+  try { localStorage.setItem('closer-theme', isLight ? 'light' : 'dark'); } catch(e) {}
+}
+
+// ── INIT ──
+(function() {
+  var theme = 'dark';
+  try { theme = localStorage.getItem('closer-theme') || 'dark'; } catch(e) {}
+  if (theme === 'light') {
+    document.body.classList.add('light');
+    document.getElementById('theme-btn').textContent = '☀️';
+  }
+  ['approach','stop','story','close'].forEach(function(t) {
+    document.getElementById('btn-' + t).textContent = state[t];
+  });
+  update(null);
+  updateStreak();
+  // Archive today's data on page load too (so bests are maintained)
+  archiveToday();
+})();
+
+// ── CONFETTI ──
+function launchConfetti() {
+  var canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var ctx = canvas.getContext('2d');
+  var colours = ['#f5c542','#4ecdc4','#a78bfa','#f87171','#fff','#ffd700'];
+  var pieces = [];
+  for (var i = 0; i < 72; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -10 - Math.random() * 120,
+      r: 4 + Math.random() * 5,
+      d: 2 + Math.random() * 3,
+      color: colours[Math.floor(Math.random() * colours.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngle: 0,
+      tiltSpeed: 0.1 + Math.random() * 0.1,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle'
+    });
+  }
+  var angle = 0;
+  var frame;
+  var startTime = Date.now();
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    pieces.forEach(function(p) {
+      p.tiltAngle += p.tiltSpeed;
+      p.y += p.d + Math.sin(angle) * 1.2;
+      p.x += Math.sin(angle + p.tilt) * 1.5;
+      p.tilt = Math.sin(p.tiltAngle) * 12;
+      ctx.beginPath();
+      ctx.fillStyle = p.color;
+      if (p.shape === 'circle') {
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      } else {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.tilt * Math.PI/180);
+        ctx.fillRect(-p.r, -p.r/2, p.r*2, p.r);
+        ctx.restore();
+      }
+      ctx.fill();
+    });
+    pieces = pieces.filter(function(p){ return p.y < canvas.height + 20; });
+    if (pieces.length > 0 && Date.now() - startTime < 2800) {
+      frame = requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  frame = requestAnimationFrame(draw);
+}
+
+// ── STREAK ──
+function updateStreak() {
+  var keys = Object.keys(archive).sort();
+  if (!keys.length && !state.approach) { document.getElementById('streak-num').textContent = 0; return; }
+
+  // Build set of days with data
+  var days = {};
+  keys.forEach(function(k){ if (archive[k] && archive[k].state && archive[k].state.approach > 0) days[k] = true; });
+  if (state.approach > 0) days[todayKey()] = true;
+
+  var sorted = Object.keys(days).sort();
+  if (!sorted.length) { document.getElementById('streak-num').textContent = 0; return; }
+
+  // Count consecutive days ending today or yesterday
+  var streak = 1;
+  var d = new Date();
+  var today = todayKey();
+  var last = sorted[sorted.length-1];
+
+  // If last active day is not today or yesterday, streak is broken
+  var diff = (new Date(today) - new Date(last)) / 86400000;
+  if (diff > 1) { document.getElementById('streak-num').textContent = 0; return; }
+
+  for (var i = sorted.length - 2; i >= 0; i--) {
+    var prev = new Date(sorted[i+1]);
+    var curr = new Date(sorted[i]);
+    var gap = (prev - curr) / 86400000;
+    if (gap === 1) streak++;
+    else break;
+  }
+  document.getElementById('streak-num').textContent = streak;
+}
+
+// ── HISTORY / BEST STATS / WEEKLY ──
+function renderHistory() {
+  renderBests();
+  renderWeek();
+}
+
+function renderBests() {
+  var g = document.getElementById('bests-grid');
+  if (!g) return;
+  // Merge today into bests display
+  var a = state.approach, s = state.stop, p = state.story, c = state.close;
+  var todayAS  = a ? Math.round(s/a*100) : 0;
+  var todaySSt = s ? Math.round(p/s*100) : 0;
+  var todayStC = p ? Math.round(c/p*100) : 0;
+  var ba = Math.max(bests.approach,  a);
+  var bs = Math.max(bests.stopRate,  todayAS);
+  var bp = Math.max(bests.storyRate, todaySSt);
+  var bc = Math.max(bests.closeRate, todayStC);
+  g.innerHTML =
+    chip('Best Approaches', ba, '') +
+    chip('Best Stop Rate',  bs, '%') +
+    chip('Best Story Rate', bp, '%') +
+    chip('Best Close Rate', bc, '%');
+}
+
+function chip(label, val, suffix) {
+  return '<div class="best-chip card">' +
+    '<div class="best-chip-val">' + (val || '—') + (val ? suffix : '') + '</div>' +
+    '<div class="best-chip-lbl txt-muted">' + label + '</div>' +
+    '</div>';
+}
+
+function renderWeek() {
+  var wb = document.getElementById('week-body');
+  if (!wb) return;
+  var today = new Date();
+  var todayStr = todayKey();
+  var days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  var html = '';
+  var maxApp = 1;
+
+  // Collect 7 days
+  var week = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date(today);
+    d.setDate(today.getDate() - i);
+    var key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    var data = archive[key] ? archive[key].state : null;
+    if (key === todayStr && state.approach > 0) data = state;
+    var app = data ? (data.approach||0) : 0;
+    if (app > maxApp) maxApp = app;
+    week.push({ key:key, day: days[d.getDay()], data:data, app:app, isToday: key===todayStr });
+  }
+
+  if (week.every(function(w){ return !w.app; })) {
+    wb.innerHTML = '<div class="no-data txt-muted" style="padding:24px;text-align:center;font-size:11px">No history yet</div>';
+    return;
+  }
+
+  week.forEach(function(w) {
+    var pct = Math.round((w.app / maxApp) * 100);
+    var closeRate = '';
+    if (w.data && w.data.story > 0) {
+      closeRate = Math.round((w.data.close||0)/w.data.story*100) + '% close';
+    } else if (w.data && w.data.approach > 0) {
+      closeRate = w.data.approach + ' app';
+    }
+    html += '<div class="week-row row-border' + (w.isToday ? ' today-row' : '') + '">';
+    html += '<div class="week-day txt-muted">' + w.day + '</div>';
+    html += '<div class="week-bar-wrap bar-track"><div class="week-bar-fill" style="width:' + pct + '%"></div></div>';
+    html += '<div class="week-stats txt-muted">' + closeRate + '</div>';
+    html += '</div>';
+  });
+  wb.innerHTML = html;
+}
+
+// ── HOUR MINI MODAL (long press) ──
+var longPressTimer = null;
+
+function setupLongPress() {
+  var hourlyBody = document.getElementById('hourly-body');
+  if (!hourlyBody) return;
+  hourlyBody.addEventListener('touchstart', function(e) {
+    var row = e.target.closest('.hourly-row');
+    if (!row) return;
+    longPressTimer = setTimeout(function() {
+      var h = row.getAttribute('data-hour');
+      if (h !== null) showHourMini(parseInt(h));
+    }, 500);
+  }, { passive: true });
+  hourlyBody.addEventListener('touchend',   function(){ clearTimeout(longPressTimer); }, { passive:true });
+  hourlyBody.addEventListener('touchmove',  function(){ clearTimeout(longPressTimer); }, { passive:true });
+  hourlyBody.addEventListener('touchcancel',function(){ clearTimeout(longPressTimer); }, { passive:true });
+}
+
+function showHourMini(h) {
+  var d = hourly[String(h)];
+  if (!d) return;
+  var a = d.approach||0, s = d.stop||0, p = d.story||0, c = d.close||0;
+  var rAS  = a ? Math.round(s/a*100) : null;
+  var rSSt = s ? Math.round(p/s*100) : null;
+  var rStC = p ? Math.round(c/p*100) : null;
+  document.getElementById('hour-mini-title').textContent = fmtHour(h) + ' Breakdown';
+  var rows = [
+    ['Approaches', a, null],
+    ['Stops',      s, rAS  !== null ? rAS+'%'  : '—'],
+    ['Short Stories', p, rSSt !== null ? rSSt+'%' : '—'],
+    ['Closes',     c, rStC !== null ? rStC+'%' : '—']
+  ];
+  var html = '';
+  rows.forEach(function(r) {
+    html += '<div class="hour-mini-row row-border">';
+    html += '<span class="txt-muted" style="font-size:10px;letter-spacing:1px;text-transform:uppercase">' + r[0] + '</span>';
+    html += '<div style="text-align:right">';
+    html += '<span class="hour-mini-val txt-main">' + r[1] + '</span>';
+    if (r[2]) html += '<span class="txt-muted" style="font-size:10px;margin-left:6px">' + r[2] + '</span>';
+    html += '</div></div>';
+  });
+  document.getElementById('hour-mini-rows').innerHTML = html;
+  document.getElementById('hour-mini-modal').classList.add('show');
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+function hideHourMini() {
+  document.getElementById('hour-mini-modal').classList.remove('show');
+}
+
+// ── BREAKDOWN ──
+function generateBreakdownText() {
+  var hours = Object.keys(hourly).map(Number).sort(function(a,b){ return a-b; });
+  var totalA = 0, totalS = 0, totalP = 0, totalC = 0;
+  hours.forEach(function(h) {
+    var d = hourly[String(h)];
+    totalA += d.approach||0; totalS += d.stop||0;
+    totalP += d.story||0;    totalC += d.close||0;
+  });
+
+  if (!totalA) return 'No data yet — start tracking!';
+
+  var rAS  = totalA ? Math.round(totalS/totalA*100) : 0;
+  var rSSt = totalS ? Math.round(totalP/totalS*100) : 0;
+  var rStC = totalP ? Math.round(totalC/totalP*100) : 0;
+
+  var lines = [];
+  lines.push('Daily breakdown');
+  lines.push(totalA + ' approached');
+  lines.push(rAS  + '% stop');
+  lines.push(rSSt + '% short story');
+  lines.push(rStC + '% close');
+  lines.push('Positives');
+
+  // 2 positives
+  var wins = [];
+  if (rAS >= 50)                          wins.push('Strong stop rate of ' + rAS + '% — over half of approaches led to a stop');
+  else if (rAS >= 30)                     wins.push('Solid stop rate of ' + rAS + '% — consistently getting people to engage');
+  if (rStC >= 50)                         wins.push('Excellent close rate of ' + rStC + '% — the pitch is converting well');
+  else if (rStC >= 25 && totalC > 0)      wins.push('Good close rate of ' + rStC + '% — the pitch is landing');
+  if (wins.length < 2 && totalC > 0)      wins.push(totalC + ' close' + (totalC !== 1 ? 's' : '') + ' on the board — results are showing');
+  if (wins.length < 2 && totalA >= 10)    wins.push('High volume of ' + totalA + ' approaches — strong work ethic today');
+  if (wins.length < 2 && totalS >= 5)     wins.push(totalS + ' stops — strong opener energy throughout the day');
+  if (wins.length < 2 && rSSt >= 50)      wins.push('Great short story conversion of ' + rSSt + '% — transitions are working');
+  if (wins.length < 2)                    wins.push('Showed up and put the reps in — consistency builds momentum');
+  while (wins.length > 2) wins.pop();
+
+  wins.forEach(function(w, i) { lines.push((i+1) + '. ' + w); });
+  lines.push('Thing to improve');
+
+  // 1 thing to work on
+  var workOn = '';
+  if (rAS < 20 && totalA >= 5)            workOn = 'Stop rate at ' + rAS + '% — sharpen the opener to get more people to engage';
+  else if (rSSt < 30 && totalS >= 4)      workOn = 'Short story conversion at ' + rSSt + '% — work on the transition from opener to pitch';
+  else if (rStC < 20 && totalP >= 3)      workOn = 'Close rate at ' + rStC + '% — tighten up the close after the short story';
+  else if (totalA < 5)                    workOn = 'Volume was low today — push for more approaches tomorrow';
+  else if (totalC === 0 && totalP >= 2)   workOn = 'No closes from ' + totalP + ' short stories — focus on the close';
+  else                                    workOn = 'Push the volume — more approaches means more chances to close';
+
+  lines.push('1. ' + workOn);
+
+  return lines.join('\n');
+}
+
+function showBreakdown() {
+  var text = generateBreakdownText();
+  document.getElementById('breakdown-text').textContent = text;
+  var copyBtn = document.getElementById('breakdown-copy-btn');
+  copyBtn.textContent = 'Copy to Clipboard';
+  copyBtn.classList.remove('copied');
+  document.getElementById('breakdown-modal').classList.add('show');
+}
+
+function hideBreakdown() {
+  document.getElementById('breakdown-modal').classList.remove('show');
+}
+
+function copyBreakdown() {
+  var text = document.getElementById('breakdown-text').textContent;
+  var btn = document.getElementById('breakdown-copy-btn');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = 'Copy to Clipboard'; btn.classList.remove('copied'); }, 2000);
+    });
+  } else {
+    // Fallback for older iOS
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); btn.textContent = 'Copied!'; btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = 'Copy to Clipboard'; btn.classList.remove('copied'); }, 2000);
+    } catch(e) { btn.textContent = 'Copy failed'; }
+    document.body.removeChild(ta);
+  }
+}
+
+</script>
+
+<!-- BREAKDOWN MODAL -->
+
+<div id="breakdown-modal" onclick="hideBreakdown()">
+  <div class="breakdown-sheet card" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div class="breakdown-header">
+      <div class="breakdown-title txt-main">Daily Breakdown</div>
+      <button class="breakdown-close txt-muted card" onclick="hideBreakdown()">✕</button>
+    </div>
+    <div class="breakdown-text txt-main" id="breakdown-text"></div>
+    <div class="breakdown-actions">
+      <button class="breakdown-copy" id="breakdown-copy-btn" onclick="copyBreakdown()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
